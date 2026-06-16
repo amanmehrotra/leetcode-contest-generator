@@ -1,1 +1,1 @@
-### Try it now at https://jagrit29.github.io/leetcode-contest-generator/
+### Try it now at https://amanmehrotra.github.io/leetcode-contest-generator/
