@@ -11,24 +11,81 @@ let totalTime = 60; // Default timer duration in minutes
 
 function startContest() {
   console.log('Starting the contest...');
-  loadQuestions();
+    const selectedTag =
+        document.getElementById('tag-select').value;
+    const selectedPattern = document.getElementById('pattern-select').value;
+    allWell = false;
+    if(selectedTag !== 'None') {
+        loadQuestions(selectedTag, 'topic')
+            .then(() => {
+                document.querySelector('.timer').classList.remove('hidden');
+                startTimer();
+            })
+            .catch(error => {
+                console.error('Failed to load questions:', error);
+            })
+        allWell = true;
+    }
+    else if(selectedPattern!=='None') {
+        loadQuestions(selectedPattern, 'pattern')
+            .then(() => {
+                document.querySelector('.timer').classList.remove('hidden');
+                startTimer();
+            })
+            .catch(error => {
+                console.error('Failed to load questions:', error);
+            });
+        allWell = true;
+    }
+    else {
+        alert('Either Topic or Pattern need to be selected');
+    }
   
   // Hide the start button and duration input
-  document.querySelector('.start-button').style.display = 'none';
-  document.querySelector('.input-container').style.display = 'none';
-  
-  // Show the regenerate and end buttons
-  document.querySelector('.regenerate-button').style.display = 'inline-block';
-  document.querySelector('.end-button').style.display = 'inline-block';
+    if(allWell) {
+        document.querySelector('.start-button').style.display = 'none';
+        document.querySelector('.input-container').style.display = 'none';
 
+        // Show the regenerate and end buttons
+        document.querySelector('.regenerate-button').style.display = 'inline-block';
+        document.querySelector('.end-button').style.display = 'inline-block';
+    }
   // Show the timer and start it
-  document.querySelector('.timer').classList.remove('hidden');
-  startTimer();
+  // document.querySelector('.timer').classList.remove('hidden');
+  // startTimer();
 }
 
 function regenerateContest() {
   console.log('Regenerating contest...');
-  loadQuestions();
+    const selectedTag =
+        document.getElementById('tag-select').value;
+    const selectedPattern = document.getElementById('pattern-select').value;
+    allWell = false;
+    if(selectedTag !== 'None') {
+        loadQuestions(selectedTag, 'topic')
+            .then(() => {
+                document.querySelector('.timer').classList.remove('hidden');
+                startTimer();
+            })
+            .catch(error => {
+                console.error('Failed to load questions:', error);
+            })
+        allWell = true;
+    }
+    else if(selectedPattern!=='None') {
+        loadQuestions(selectedPattern, 'pattern')
+            .then(() => {
+                document.querySelector('.timer').classList.remove('hidden');
+                startTimer();
+            })
+            .catch(error => {
+                console.error('Failed to load questions:', error);
+            });
+        allWell = true;
+    }
+    else {
+        alert('Either Topic or Pattern need to be selected');
+    }
 }
 
 function endContest() {
@@ -50,40 +107,103 @@ function endContest() {
   document.querySelector('.question-list').innerHTML = '';
 }
 
-function loadQuestions() {
-  console.log('Loading questions...');
-  fetch('data/questions.json')
-      .then(response => {
-          console.log('Fetch response:', response);
-          return response.json();
-      })
-      .then(data => {
-          console.log('Questions data:', data);
-          const easyQuestions = data.filter(q => q.difficulty === 'EASY');
-          const mediumQuestions = data.filter(q => q.difficulty === 'MEDIUM');
-          const hardQuestions = data.filter(q => q.difficulty === 'HARD');
-          
-          console.log('Easy questions:', easyQuestions);
-          console.log('Medium questions:', mediumQuestions);
-          console.log('Hard questions:', hardQuestions);
-          
-          const easyQuestion = getRandomQuestions(easyQuestions, 1);
-          const mediumQuestionsSelected = getRandomQuestions(mediumQuestions, 2);
-          const hardQuestion = getRandomQuestions(hardQuestions, 1);
-          
-          const questionList = [...easyQuestion, ...mediumQuestionsSelected, ...hardQuestion];
-          console.log('Selected questions:', questionList);
-          
-          const formattedQuestions = questionList.map(q => ({
-              title: q.title,
-              url: `https://leetcode.com/problems/${q.titleSlug}/` // Correct URL construction
-          }));
-          
-          console.log('Formatted questions:', formattedQuestions);
-          displayQuestions(formattedQuestions);
-      })
-      .catch(error => console.error('Error loading questions:', error));
+function loadQuestions(tag,type) {
+    return fetch(`https://leetcode-contest-generator-backend.onrender.com/api/tag/${encodeURIComponent(tag)}?type=${encodeURIComponent(type)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+
+            const data =
+                result.data.problemsetQuestionList.questions;
+            console.log(data)
+            const easyQuestions = data.filter(
+                q => q.difficulty.toLowerCase() === 'easy'
+            );
+
+            const mediumQuestions = data.filter(
+                q => q.difficulty.toLowerCase() === 'medium'
+            );
+
+            const hardQuestions = data.filter(
+                q => q.difficulty.toLowerCase() === 'hard'
+            );
+
+            const easyQuestion = getRandomQuestions(
+                easyQuestions,
+                1
+            );
+
+            const mediumQuestionsSelected =
+                getRandomQuestions(
+                    mediumQuestions,
+                    2
+                );
+
+            const hardQuestion = getRandomQuestions(
+                hardQuestions,
+                1
+            );
+
+            const questionList = [
+                ...easyQuestion,
+                ...mediumQuestionsSelected,
+                ...hardQuestion
+            ];
+
+            const formattedQuestions =
+                questionList.map(q => ({
+                    title: q.title,
+                    url: `https://leetcode.com/problems/${q.titleSlug}/`
+                }));
+
+            displayQuestions(formattedQuestions);
+        })
+        .catch(error => {
+            console.error(
+                'Error loading questions:',
+                error
+            );
+        });
 }
+
+// function loadQuestions() {
+//   console.log('Loading questions...');
+//   fetch('data/questions.json')
+//       .then(response => {
+//           console.log('Fetch response:', response);
+//           return response.json();
+//       })
+//       .then(data => {
+//           console.log('Questions data:', data);
+//           const easyQuestions = data.filter(q => q.difficulty === 'EASY');
+//           const mediumQuestions = data.filter(q => q.difficulty === 'MEDIUM');
+//           const hardQuestions = data.filter(q => q.difficulty === 'HARD');
+//
+//           console.log('Easy questions:', easyQuestions);
+//           console.log('Medium questions:', mediumQuestions);
+//           console.log('Hard questions:', hardQuestions);
+//
+//           const easyQuestion = getRandomQuestions(easyQuestions, 1);
+//           const mediumQuestionsSelected = getRandomQuestions(mediumQuestions, 2);
+//           const hardQuestion = getRandomQuestions(hardQuestions, 1);
+//
+//           const questionList = [...easyQuestion, ...mediumQuestionsSelected, ...hardQuestion];
+//           console.log('Selected questions:', questionList);
+//
+//           const formattedQuestions = questionList.map(q => ({
+//               title: q.title,
+//               url: `https://leetcode.com/problems/${q.titleSlug}/` // Correct URL construction
+//           }));
+//
+//           console.log('Formatted questions:', formattedQuestions);
+//           displayQuestions(formattedQuestions);
+//       })
+//       .catch(error => console.error('Error loading questions:', error));
+// }
 
 function displayQuestions(questions) {
   console.log('Displaying questions:', questions);
