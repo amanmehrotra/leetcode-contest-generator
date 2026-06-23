@@ -279,6 +279,7 @@ function getRandomQuestions(questions, count) {
 }
 
 function startTimer() {
+  clearInterval(timerInterval);
   const durationInput = document.getElementById('duration');
   totalTime = parseInt(durationInput.value) || 60; // Default to 60 minutes if input is invalid
   let time = totalTime * 60; // Convert minutes to seconds
