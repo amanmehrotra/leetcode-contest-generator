@@ -132,32 +132,59 @@ function loadQuestions(tag,type) {
                 q => q.difficulty.toLowerCase() === 'hard'
             );
 
-            const easyQuestion = getRandomQuestions(
-                easyQuestions,
-                1
-            );
+             const selectedDifficulties = {
+                easy: document.getElementById("easyCheckbox").checked,
+                medium: document.getElementById("mediumCheckbox").checked,
+                hard: document.getElementById("hardCheckbox").checked
+            };
+            console.log(selectedDifficulties.easy+ " "+selectedDifficulties.medium);
+            let easyCount = 0;
+            let mediumCount = 0;
+            let hardCount = 0;
 
-            const mediumQuestionsSelected =
-                getRandomQuestions(
-                    mediumQuestions,
-                    2
-                );
-
-            const hardQuestion = getRandomQuestions(
-                hardQuestions,
-                1
-            );
+            if (selectedDifficulties.easy &&
+                selectedDifficulties.medium &&
+                selectedDifficulties.hard) {
+                easyCount = 1;
+                mediumCount = 2;
+                hardCount = 1;
+            }
+            else if (selectedDifficulties.easy &&
+                selectedDifficulties.medium) {
+                easyCount = 1;
+                mediumCount = 3;
+            }
+            else if (selectedDifficulties.medium &&
+                selectedDifficulties.hard) {
+                mediumCount = 3;
+                hardCount = 1;
+            }
+            else if (selectedDifficulties.easy &&
+                selectedDifficulties.hard) {
+                easyCount = 2;
+                hardCount = 2;
+            }
+            else if (selectedDifficulties.easy) {
+                easyCount = 4;
+            }
+            else if (selectedDifficulties.medium) {
+                mediumCount = 4;
+            }
+            else if (selectedDifficulties.hard) {
+                hardCount = 4;
+            }
 
             const questionList = [
-                ...easyQuestion,
-                ...mediumQuestionsSelected,
-                ...hardQuestion
+                ...getRandomQuestions(easyQuestions, easyCount),
+                ...getRandomQuestions(mediumQuestions, mediumCount),
+                ...getRandomQuestions(hardQuestions, hardCount)
             ];
 
             const formattedQuestions =
                 questionList.map(q => ({
                     title: q.title,
-                    url: `https://leetcode.com/problems/${q.titleSlug}/`
+                    url: `https://leetcode.com/problems/${q.titleSlug}/`,
+                  difficulty: q.difficulty
                 }));
 
             displayQuestions(formattedQuestions);
@@ -219,20 +246,14 @@ function displayQuestions(questions) {
       questionLink.href = q.url;
       questionLink.target = '_blank';
       questionLink.textContent = q.title;
+      questionLink.difficulty = q.difficulty;
       
       const markButton = document.createElement('button');
       markButton.className = 'tick-button';
       markButton.textContent = 'Mark as Solved';
       markButton.onclick = () => toggleSolved(index);
 
-            // Add a class based on index (for demonstration, adjust as needed)
-      if (index === 0) {
-        questionLink.className = 'easy';
-      } else if (index === 1 || index === 2) {
-        questionLink.className = 'medium';
-      } else {
-        questionLink.className = 'hard';
-      }
+      questionLink.className = questionLink.difficulty.toLowerCase();
       
       questionItem.appendChild(questionLink);
       questionItem.appendChild(markButton);
